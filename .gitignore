@@ -8,3 +8,5 @@ out/
 /storage.srl
 /CLAUDE.md
 /PROJECT_DESCRIPTION.md
+/frontend/dist/
+/frontend/coverage/
