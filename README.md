@@ -144,7 +144,9 @@ npm test           # Karma + Jasmine (watch mode)
 npm run test:ci    # single headless run with coverage
 ```
 
-GitHub Actions (`.github/workflows/ci.yml`) runs the backend `verify` and the frontend build and tests on every push and PR.
+Karma needs Chrome; on a machine with only Edge, point `CHROME_BIN` at the Edge executable.
+
+GitHub Actions (`.github/workflows/ci.yml`) runs the backend `verify` and the frontend build and tests on pushes to `main` and on every pull request.
 
 ---
 
