@@ -1,20 +1,11 @@
-# Diagrammer til slides
+# Diagrams
 
-Paste hvert diagram ind på **https://mermaid.live**, eksporter som SVG,
-og gem i en `diagrams/`-mappe ved siden af SLIDES.md.
-
-Forventet filstruktur:
-```
-diagrams/
-  arch.svg
-  domain.svg
-  seq-paafyldning.svg
-  seq-omhaeldning.svg
-```
+Mermaid sources for the rendered diagrams in [`diagrams/`](diagrams/).
+To regenerate, paste a block into https://mermaid.live and export it as PNG.
 
 ---
 
-## 1. Arkitektur — `diagrams/arch.svg`
+## 1. Arkitektur — `diagrams/arch.png`
 
 ```mermaid
 classDiagram
@@ -51,7 +42,7 @@ classDiagram
 
 ---
 
-## 2. Domænemodel — `diagrams/domain.svg`
+## 2. Domænemodel — `diagrams/domain.png`
 
 ```mermaid
 classDiagram
@@ -128,7 +119,7 @@ classDiagram
 
 ---
 
-## 3. Sekvensdiagram: Påfyldning — `diagrams/seq-paafyldning.svg`
+## 3. Sekvensdiagram: Påfyldning — `diagrams/seq-paafyldning.png`
 
 ```mermaid
 sequenceDiagram
@@ -162,7 +153,7 @@ sequenceDiagram
 
 ---
 
-## 4. Sekvensdiagram: Omhældning — `diagrams/seq-omhaeldning.svg`
+## 4. Sekvensdiagram: Omhældning — `diagrams/seq-omhaeldning.png`
 
 ```mermaid
 sequenceDiagram
