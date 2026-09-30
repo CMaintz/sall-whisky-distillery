@@ -1,5 +1,6 @@
 package dk.sallwhisky.config;
 
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -21,6 +22,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@EnableConfigurationProperties(AdminCredentialsProperties.class)
 public class SecurityConfig {
 
     @Bean
@@ -43,15 +45,15 @@ public class SecurityConfig {
     }
 
     @Bean
-    public UserDetailsService userDetailsService() {
-        // Hardcoded credentials for demo purposes only.
+    public UserDetailsService userDetailsService(AdminCredentialsProperties admin) {
+        // Single in-memory user from app.security.admin.* (APP_ADMIN_USERNAME / APP_ADMIN_PASSWORD).
         // In production: use a UserRepository + BCrypt or an OAuth2 provider.
-        UserDetails admin = User.builder()
-                .username("admin")
-                .password(passwordEncoder().encode("admin"))
+        UserDetails user = User.builder()
+                .username(admin.username())
+                .password(passwordEncoder().encode(admin.password()))
                 .roles("ADMIN")
                 .build();
-        return new InMemoryUserDetailsManager(admin);
+        return new InMemoryUserDetailsManager(user);
     }
 
     @Bean
