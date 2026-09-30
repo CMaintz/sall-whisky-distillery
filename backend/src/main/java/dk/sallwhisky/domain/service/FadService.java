@@ -112,13 +112,14 @@ public class FadService {
 
         if (fad.getHylde() != null) {
             fad.getHylde().setFad(null);
-            hyldeRepository.save(fad.getHylde());
+            hyldeRepository.saveAndFlush(fad.getHylde());
         }
 
         nyHylde.setFad(fad);
+        fad.setHylde(nyHylde);
         hyldeRepository.save(nyHylde);
 
-        return toResponse(fadRepository.findById(fadId).orElseThrow());
+        return toResponse(fad);
     }
 
     public void sletFad(UUID fadId) {
