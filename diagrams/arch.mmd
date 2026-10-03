@@ -1,0 +1,32 @@
+flowchart TB
+    subgraph WEB["Spring Boot + Angular (backend/ + frontend/, 2026)"]
+        direction TB
+        NG["<b>Angular 17 SPA</b><br/>features: fade, destillering,<br/>lagerstyring, whisky<br/>SallWhiskyService + AuthInterceptor"]
+        RC["<b>REST controllers</b><br/>Fad, Destillering, Korn,<br/>Lager, Whisky"]
+        SVC["<b>Services</b><br/>FadService, DestilleringService,<br/>LagerService, WhiskyService"]
+        REPO["<b>Spring Data repositories</b><br/>+ JPA entities"]
+        DB[("H2<br/>in-memory")]
+        NG -->|"HTTP Basic, /api/**"| RC
+        RC -->|DTO records| SVC
+        SVC --> REPO
+        REPO -->|JPA| DB
+    end
+
+    subgraph FX["JavaFX desktop (src/, 2024)"]
+        direction TB
+        App["<b>App</b><br/>loadStorage → setStorage<br/>saveStorage ved lukning"]
+        GUI["<b>gui</b><br/>LoginPane → StartVindue<br/>FadVindue, DestilleringPane,<br/>LagerstyringPane, WhiskyPane<br/>+ dialoger som PåfyldFad"]
+        Ctrl["<b>Controller</b><br/>statisk facade"]
+        Models["<b>application.models</b><br/>Fad, Destillat, Lager …<br/>forretningslogik i modellerne"]
+        StorageI["<b>Storage</b><br/>interface"]
+        ListS["<b>ListStorage</b><br/>serialiseres til .srl-fil"]
+        App --> GUI
+        GUI -->|kalder| Ctrl
+        GUI -.->|PåfyldFad går direkte| Models
+        Ctrl --> Models
+        Ctrl -->|delegerer til| StorageI
+        ListS -.->|implementerer| StorageI
+        App -.-> ListS
+    end
+
+

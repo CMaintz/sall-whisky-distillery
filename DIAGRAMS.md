@@ -1,184 +1,45 @@
 # Diagrams
 
-Mermaid sources for the rendered diagrams in [`diagrams/`](diagrams/).
-To regenerate, paste a block into https://mermaid.live and export it as PNG.
+The PNGs in [`diagrams/`](diagrams/) are rendered from the Mermaid sources next to them (`*.mmd`), with one shared theme in `diagrams/mermaid.config.json`. To regenerate all four after editing a source:
+
+```sh
+sh diagrams/render.sh
+```
+
+It runs `@mermaid-js/mermaid-cli` through `npx`, so Node is the only requirement. I render to PNG on a white background rather than SVG, because GitHub strips the HTML labels Mermaid puts in its SVGs.
+
+The architecture diagram covers both versions of the app. The domain model and the two sequence diagrams describe the JavaFX version (`src/`), where the business logic lives in the model classes. In the Spring Boot rewrite the same flows sit in `FadService`, and `FadHistorik` is folded into the `Fad` entity.
 
 ---
 
-## 1. Arkitektur — `diagrams/arch.png`
+## 1. Architecture
 
-```mermaid
-classDiagram
-    direction TB
-    class GUI {
-        <<component>>
-        FadVindue
-        DestilleringPane
-        LagerstyringPane
-        WhiskyPane
-    }
-    class Controller {
-        <<service>>
-        +createFad()$
-        +omhældningAfDestillat()$
-        +getFadeMedFærdigDestillat()$
-    }
-    class Storage {
-        <<interface>>
-        +getFade()
-        +addFad()
-        +getLagre()
-    }
-    class ListStorage {
-        <<repository>>
-        +loadStorage()
-        +saveStorage()
-    }
+Source: [`diagrams/arch.mmd`](diagrams/arch.mmd)
 
-    GUI --> Controller : kalder
-    Controller --> Storage : delegerer til
-    Storage <|.. ListStorage : implementerer
-```
+![Architecture](diagrams/arch.png)
 
----
+On the JavaFX side the GUI talks to a static `Controller`, which delegates persistence to the `Storage` interface. `ListStorage` implements it and serializes everything to a `.srl` file on exit. The dashed arrow from the GUI to the models is `PåfyldFad`, which builds the `Destillat` itself instead of going through the `Controller`.
 
-## 2. Domænemodel — `diagrams/domain.png`
+## 2. Domain model
 
-```mermaid
-classDiagram
-    direction LR
-    class Korn {
-        +String sort
-        +String variant
-        +String markNavn
-    }
-    class Destillering {
-        +int newSpiritbatchNr
-        +double alkoholProcent
-        +double antalLiter
-    }
-    class Påfyldning {
-        ~Påfyldning()
-        +double literPåfyldt
-    }
-    class Destillat {
-        +createPåfyldning() Påfyldning
-        +destillatKlar() bool
-        +omhældDestillat(Fad)
-    }
-    class ModningsHistorik {
-        +LocalDate påfyldningsDato
-        +LocalDate slutDato
-    }
-    class Fad {
-        +String fadNr
-        +int literKapacitet
-    }
-    class FadHistorik {
-        +String tidligereIndhold
-        +String leverandør
-        +String land
-    }
-    class Lager {
-        +String navn
-    }
-    class Reol {
-        +int reolNummer
-    }
-    class Hylde {
-        +int nummer
-    }
-    class FadTapning {
-        ~FadTapning()
-        +double literTappet
-    }
-    class WhiskyProdukt {
-        +whiskyType() String
-        +genererHistorie() String
-    }
-    class WhiskyFlaske {
-        +int flaskeNr
-        +String produktHistorie
-    }
+Source: [`diagrams/domain.mmd`](diagrams/domain.mmd)
 
-    Korn "1" <-- "1..*" Destillering
-    Destillering "1" <-- "1..*" Påfyldning
-    Destillat "1" *-- "1..*" Påfyldning
-    Destillat "1" *-- "1..*" ModningsHistorik
-    ModningsHistorik "1" --> "1" Fad
-    Fad "1" *-- "1" FadHistorik
-    Fad "1" o-- "0..1" Destillat
-    Lager "1" *-- "1..*" Reol
-    Reol "1" *-- "1..*" Hylde
-    Hylde "1" o-- "0..1" Fad
-    WhiskyProdukt "1" *-- "1..*" FadTapning
-    FadTapning "1" --> "1" Fad
-    FadTapning "1" --> "1" Destillat
-    WhiskyProdukt "1" *-- "1..*" WhiskyFlaske
-```
+![Domain model](diagrams/domain.png)
 
----
+Classes are grouped by area: production, barrels, warehouse and bottling. Each class shows its fields plus the factory and domain methods that matter, not getters and setters. Multiplicities are what the constructors guarantee, so a fresh `Lager` has `0..*` racks, not `1..*`.
 
-## 3. Sekvensdiagram: Påfyldning — `diagrams/seq-paafyldning.png`
+## 3. Sequence: filling a barrel (påfyldning)
 
-```mermaid
-sequenceDiagram
-    actor Bruger
-    participant GUI as PåfyldFad
-    participant D as Destillat
-    participant PF as Påfyldning
-    participant DR as Destillering
-    participant F as Fad
-    participant MH as ModningsHistorik
+Source: [`diagrams/seq-paafyldning.mmd`](diagrams/seq-paafyldning.mmd)
 
-    Bruger->>GUI: udfyld og klik Påfyld
-    Note over GUI: Validerer input
-    GUI->>D: new Destillat()
-    Note over GUI,D: ⚠️ Direkte - ikke via Controller
-    loop for hver Destillering
-        GUI->>D: createPåfyldning(navn, liter, dest)
-        activate D
-        D->>D: validate()
-        D->>PF: new Påfyldning(navn, liter, dest)
-        Note over PF: package-private
-        PF->>DR: fjernAntalLiter(liter)
-        D->>D: udregnAlkoholprocent()
-        deactivate D
-    end
-    GUI->>F: addDestillat(destillat)
-    F->>D: setFad(this)
-    D->>MH: new ModningsHistorik(fad, now)
-    Note over MH: Modningsuret starter
-```
+![Sequence: påfyldning](diagrams/seq-paafyldning.png)
 
----
+`PåfyldFad.PåfyldAction()` creates the `Destillat` and one `Påfyldning` per chosen distillation, then puts the destillat in the barrel and the barrel on a shelf. The warehouse, rack and shelf are only checked after the liters have been taken from the distillations, so a missing shelf leaves those liters gone.
 
-## 4. Sekvensdiagram: Omhældning — `diagrams/seq-omhaeldning.png`
+## 4. Sequence: re-casking (omhældning)
 
-```mermaid
-sequenceDiagram
-    actor Bruger
-    participant GUI as FlytFadWindow
-    participant C as Controller
-    participant D as Destillat
-    participant FF as FadFra
-    participant FT as FadTil
-    participant MH as ModningsHistorik
+Source: [`diagrams/seq-omhaeldning.mmd`](diagrams/seq-omhaeldning.mmd)
 
-    Bruger->>GUI: vælg fade → Omhæld
-    GUI->>C: omhældningAfDestillat(fra, til)
-    Note over GUI,C: ✅ Korrekt via Controller
-    C->>D: omhældDestillat(fadTil)
-    activate D
-    D->>FF: removeDestillat()
-    Note over FF: FadFra er tomt
-    D->>FT: addDestillat(this)
-    FT->>D: setFad(fadTil)
-    activate D
-    D->>MH: setSlutDato(now)
-    Note over MH: Gammel periode lukkes
-    D->>MH: new ModningsHistorik(fadTil, now)
-    Note over MH: Ny periode begynder
-    deactivate D
-    deactivate D
-```
+![Sequence: omhældning](diagrams/seq-omhaeldning.png)
+
+`FadVindue` sends the full and the empty barrel to `Controller.omhældningAfDestillat()`. The destillat closes its current `ModningsHistorik` period and opens a new one for the new barrel, so the whole ageing history is kept.

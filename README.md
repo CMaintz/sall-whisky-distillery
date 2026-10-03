@@ -52,6 +52,8 @@ Korn ──> Destillering ──> Påfyldning ──> Destillat ──> Fad ─�
                                                     FadTapning ──> WhiskyProdukt ──> WhiskyFlaske
 ```
 
+The full class diagram, the architecture diagram and sequence diagrams for filling and re-casking a barrel are in [DIAGRAMS.md](DIAGRAMS.md).
+
 ---
 
 ## Stack 1: JavaFX desktop app
@@ -199,7 +201,7 @@ Sall-Whisky-Destillery-Application/
 │       ├── core/                 # Auth interceptor, models, HTTP service
 │       └── features/             # fade, destillering, lagerstyring, whisky
 ├── Test/                         # JavaFX JUnit 5 tests
-└── diagrams/                     # Architecture and domain SVG diagrams
+└── diagrams/                     # Mermaid sources and rendered PNGs (see DIAGRAMS.md)
 ```
 
 ---

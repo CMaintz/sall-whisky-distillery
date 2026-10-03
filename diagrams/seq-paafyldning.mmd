@@ -1,0 +1,34 @@
+sequenceDiagram
+    autonumber
+    actor B as Bruger
+    participant GUI as PåfyldFad
+    participant D as Destillat
+    participant PF as Påfyldning
+    participant DR as Destillering
+    participant F as Fad
+    participant FH as FadHistorik
+    participant MH as ModningsHistorik
+    participant H as Hylde
+
+    B->>GUI: vælg destilleringer, liter og hylde, klik Påfyld
+    Note over GUI: tjekker liter mod destillering og fadets kapacitet
+    GUI->>D: new Destillat()
+    Note over GUI,D: direkte på modellen, uden om Controller
+    loop for hver valgt Destillering
+        GUI->>+D: createPåfyldning(navn, liter, dest)
+        Note right of D: afviser liter ≤ 0<br/>eller mere end destilleringen har
+        D->>PF: new Påfyldning(navn, liter, dest)
+        PF->>DR: fjernAntalLiter(liter)
+        PF->>DR: setSlutTidspunkt(now), hvis ikke sat
+        D->>D: udregnAlkoholprocent()
+        D-->>-GUI: Påfyldning
+    end
+    Note over GUI: tjekker lager, reol og hylde først her,<br/>efter literne er trukket fra destilleringerne
+    GUI->>+F: addDestillat(destillat)
+    F->>FH: addDestillat(destillat)
+    F->>+D: setFad(this)
+    D->>MH: new ModningsHistorik(fad, now)
+    Note over MH: modningsuret starter
+    deactivate D
+    deactivate F
+    GUI->>H: placerFad(fad)
