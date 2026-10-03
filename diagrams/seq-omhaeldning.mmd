@@ -1,0 +1,29 @@
+sequenceDiagram
+    autonumber
+    actor B as Bruger
+    participant GUI as FadVindue
+    participant C as Controller
+    participant D as Destillat
+    participant FF as fadFra
+    participant FT as fadTil
+    participant FH as FadHistorik (fadTil)
+    participant MG as ModningsHistorik (gammel)
+    participant MN as ModningsHistorik (ny)
+
+    B->>GUI: vælg fyldt og tomt fad, klik Omhæld
+    GUI->>+C: omhældningAfDestillat(fadFra, fadTil)
+    C->>FF: getDestillat()
+    C->>+D: omhældDestillat(fadTil)
+    D->>FF: removeDestillat()
+    D->>+FT: addDestillat(this)
+    FT->>FH: addDestillat(destillat)
+    FT->>+D: setFad(fadTil)
+    D->>MG: setSlutDato(now)
+    Note over MG: gammel periode lukkes
+    D->>MN: new ModningsHistorik(fadTil, now)
+    Note over MN: ny periode begynder
+    deactivate D
+    deactivate FT
+    deactivate D
+    deactivate C
+    Note over GUI,MN: kun destillatet flytter, fadene bliver på deres hylder

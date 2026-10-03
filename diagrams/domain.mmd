@@ -1,0 +1,103 @@
+classDiagram
+    direction TB
+
+    namespace Produktion {
+        class Korn {
+            String sort
+            String variant
+            String markNavn
+        }
+        class Destillering {
+            int newSpiritbatchNr
+            String maltBatch
+            String medarbejderNavn
+            double antalLiter
+            double alkoholProcent
+            String rygemateriale
+            LocalDateTime startTidspunkt
+            LocalDateTime slutTidspunkt
+        }
+        class Påfyldning {
+            String medarbejderNavn
+            double literPåfyldt
+        }
+        class Destillat {
+            double antalLiter
+            double alkoholprocent
+            createPåfyldning() Påfyldning
+            omhældDestillat(Fad)
+            destillatKlar() boolean
+        }
+    }
+
+    namespace Fade {
+        class Fad {
+            String fadNr
+            int literKapacitet
+            createFadHistorik() FadHistorik
+            addDestillat(Destillat)
+        }
+        class FadHistorik {
+            String tidligereIndhold
+            String land
+            String leverandør
+            LocalDate fraÅr
+            LocalDate tilÅr
+        }
+        class ModningsHistorik {
+            LocalDate påfyldningsDato
+            LocalDate slutDato
+        }
+    }
+
+    namespace Lagerstyring {
+        class Lager {
+            String navn
+            createReol(antalHylder) Reol
+        }
+        class Reol {
+            int reolNummer
+        }
+        class Hylde {
+            int nummer
+            placerFad(Fad)
+        }
+    }
+
+    namespace Aftapning {
+        class WhiskyProdukt {
+            String navn
+            double antalLiter
+            double alkoholprocent
+            double literVandTilføjet
+            createFadTapning() FadTapning
+            createWhiskyFlaske() WhiskyFlaske
+            whiskyType() String
+            genererHistorie() String
+        }
+        class FadTapning {
+            String medarbejderNavn
+            double literTappet
+        }
+        class WhiskyFlaske {
+            int flaskeNr
+            String produktHistorie
+        }
+    }
+
+    Destillering "0..*" --> "1" Korn
+    Destillat "1" *-- "0..*" Påfyldning
+    Påfyldning "0..*" --> "1" Destillering
+    Destillat "1" *-- "0..*" ModningsHistorik
+    ModningsHistorik "0..*" --> "1" Fad
+    Fad "0..1" -- "0..1" Destillat : nuværende indhold
+    Fad "1" *-- "1" FadHistorik
+    FadHistorik "0..*" --> "0..*" Destillat : tidligere destillater
+    Lager "1" *-- "0..*" Reol
+    Reol "1" *-- "0..*" Hylde
+    Hylde "0..1" o-- "0..1" Fad
+    WhiskyProdukt "1" *-- "0..*" FadTapning
+    FadTapning "0..*" --> "1" Fad
+    FadTapning "0..*" --> "1" Destillat
+    WhiskyProdukt "1" *-- "0..*" WhiskyFlaske
+    WhiskyFlaske --> WhiskyProdukt
